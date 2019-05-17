@@ -1,0 +1,16 @@
+{
+    "name": "vame/sooth",
+    "type": "library",
+    "description": "A Simple and efficient database migration-tool written in PHP.",
+    "keywords": ["migration","database","sql","simple"],
+    "homepage": "https://github.com/valmir95/Sooth",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Valmir Memeti",
+            "email": "valmirmemeti@gmail.com",
+            "homepage": "https://github.com/valmir95",
+            "role": "Developer"
+        }
+    ]
+}
