@@ -13,5 +13,6 @@
             "homepage": "https://github.com/valmir95",
             "role": "Developer"
         }
-    ]
+    ],
+    "bin": ["bin/sooth"]
 }
