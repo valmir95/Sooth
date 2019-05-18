@@ -5,6 +5,7 @@
     "keywords": ["migration","database","sql","simple"],
     "homepage": "https://github.com/valmir95/Sooth",
     "license": "MIT",
+    "version": "0.1.0",
     "authors": [
         {
             "name": "Valmir Memeti",
