@@ -59,10 +59,10 @@ class ArgumentAnalyzer{
                     //Create migration. Also requiring the name of the migration as argument.
                     if(count($args) == 2){
                         $migrationName = $args[1];
-                        if(file_exists("SoothMigrations/migrations")){
+                        if(file_exists(self::MIGRATION_ROOT_DIR . "/migrations")){
                             $migrationTimeStamp = time();
                             $migrationFileName = $migrationTimeStamp . "_migration_" . $migrationName . ".json";
-                            $migrationFile = fopen("SoothMigrations/migrations/" . $migrationFileName, "w");
+                            $migrationFile = fopen(self::MIGRATION_ROOT_DIR . "/migrations/" . $migrationFileName, "w");
                             $migrationFileAssoc = ['uniqueId' => uniqid("", true), 'createdAt' => $migrationTimeStamp, 'migrationName' => $migrationName ,'query' => ""];
                             fwrite($migrationFile, json_encode($migrationFileAssoc, JSON_PRETTY_PRINT));
                         }
