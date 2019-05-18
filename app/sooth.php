@@ -22,13 +22,15 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
  */
+require __DIR__ . "/../src/Config/Config.php";
 require __DIR__ . "/../src/ArgumentAnalyzer.php";
 require __DIR__ . "/../src/SoothApp.php";
 
 
 try{
     array_shift($argv);
-    $config = null;
+    $configPath = __DIR__ . '/../SoothMigrations/config.json';
+    $config = Config::fromJsonPath($configPath);
     $app = new SoothApp($config, $argv);
     $app->run();
 }

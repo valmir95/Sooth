@@ -75,11 +75,11 @@ class ArgumentAnalyzer{
                     break;
                 
                 default:
-                    throw new Exception("Argument not supported");
+                    throw new Exception("Argument not supported. Supported arguments: \n init \n create <migration_name> \n migrate");
             }
         }
         else{
-            echo "Supported commands: \n init \n create <migration_name> \n migrate";
+            echo "Supported arguments: \n init \n create <migration_name> \n migrate";
         }
     }
 
@@ -93,8 +93,7 @@ class ArgumentAnalyzer{
         if(!file_exists(self::MIGRATION_ROOT_DIR)){
             mkdir(self::MIGRATION_ROOT_DIR . "/migrations", 0777, true);
             $configFile = fopen(self::MIGRATION_ROOT_DIR . "/config.json", "w");
-            $defaultConfig = ['databaseType' => '', 'credentials' => ['username' => '', 'password' => '']];
-
+            $defaultConfig = ['adapter' => 'mysql', 'host' => 'localhost', 'database' => 'dev_db', 'user' => 'root', 'pass' => '', 'port' => 3306];
             $completedMigrationsFile = fopen(self::MIGRATION_ROOT_DIR . "/completedMigs.json", "w");
             $defaultCompletedMigrationsContent = ['completed' => []];
             fwrite($completedMigrationsFile, json_encode($defaultCompletedMigrationsContent, JSON_PRETTY_PRINT));
@@ -112,11 +111,10 @@ class ArgumentAnalyzer{
      */
     private function migrate(){
         $directory = self::MIGRATION_ROOT_DIR . "/migrations/";
-        if(file_exists($directory)){
+        if(file_exists($directory) && !is_null($this->config)){
             $migrationFileNames = array_diff(scandir($directory), array('..', '.'));
             $completedMigrationsFileContent = file_get_contents(self::MIGRATION_ROOT_DIR . "/completedMigs.json");
             $completedMigrationsFileAssoc = json_decode($completedMigrationsFileContent, true);
-            $migrationsRan = [];
             
             foreach($migrationFileNames as $fileName){
                 if(!in_array($fileName, $completedMigrationsFileAssoc['completed'])){
@@ -147,7 +145,7 @@ class ArgumentAnalyzer{
     private function create(){
         if(count($this->args) == 2){
             $migrationName = $this->args[1];
-            if(file_exists(self::MIGRATION_ROOT_DIR . "/migrations")){
+            if(file_exists(self::MIGRATION_ROOT_DIR . "/migrations") && !is_null($this->config)){
                 $migrationTimeStamp = time();
                 $migrationFileName = $migrationTimeStamp . "_migration_" . $migrationName . ".json";
                 $migrationFile = fopen(self::MIGRATION_ROOT_DIR . "/migrations/" . $migrationFileName, "w");
