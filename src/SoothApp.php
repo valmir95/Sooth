@@ -43,9 +43,7 @@ class SoothApp{
      * @return void
      */
     public function run(){
-        if(count($this->args) > 0){
-            $argumentAnalyzer = new ArgumentAnalyzer($this->config, $this->args);
-            $argumentAnalyzer->executeArgs();
-        }
+        $argumentAnalyzer = new ArgumentAnalyzer($this->config, $this->args);
+        $argumentAnalyzer->executeArgs();
     }
 }

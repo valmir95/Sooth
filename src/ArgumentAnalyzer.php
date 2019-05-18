@@ -49,6 +49,41 @@ class ArgumentAnalyzer{
     }
 
 
+
+    /**
+     * Executes args given to tool.
+     *
+     * @return void
+     */
+    public function executeArgs(){
+        if(count($this->args) > 0){
+
+            $mainArg = $this->args[0];
+
+            switch ($mainArg) {
+                case 'init':
+                    $this->init();
+                    break;
+                
+                case 'migrate':
+                    $this->migrate();
+                    break;
+
+                
+                case 'create':
+                    $this->create();
+                    break;
+                
+                default:
+                    throw new Exception("Argument not supported");
+            }
+        }
+        else{
+            echo "Supported commands: \n init \n create <migration_name> \n migrate";
+        }
+    }
+
+
     /**
      * Creates structure of migration folder.
      *
@@ -125,38 +160,6 @@ class ArgumentAnalyzer{
         }
         else{
             throw new Exception('Migration syntax invalid. The syntax is "Sooth create <migration_name>"');
-        }
-    }
-
-
-
-    /**
-     * Executes args given to tool.
-     *
-     * @return void
-     */
-    public function executeArgs(){
-        if(count($this->args) > 0){
-
-            $mainArg = $this->args[0];
-
-            switch ($mainArg) {
-                case 'init':
-                    $this->init();
-                    break;
-                
-                case 'migrate':
-                    $this->migrate();
-                    break;
-
-                
-                case 'create':
-                    $this->create();
-                    break;
-                
-                default:
-                    throw new Exception("Argument not supported");
-            }
         }
     }
 }

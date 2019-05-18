@@ -27,12 +27,10 @@ require __DIR__ . "/../src/SoothApp.php";
 
 
 try{
-    if(count($argv) > 0){
-        array_shift($argv);
-        $config = null;
-        $app = new SoothApp($config, $argv);
-        $app->run();
-    }
+    array_shift($argv);
+    $config = null;
+    $app = new SoothApp($config, $argv);
+    $app->run();
 }
 catch(Exception $ex){
     echo $ex->getMessage();
