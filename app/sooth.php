@@ -29,7 +29,7 @@ require __DIR__ . "/../src/SoothApp.php";
 
 try{
     array_shift($argv);
-    $configPath = __DIR__ . '/../SoothMigrations/config.json';
+    $configPath = 'SoothMigrations/config.json';
     $config = Config::fromJsonPath($configPath);
     $app = new SoothApp($config, $argv);
     $app->run();
