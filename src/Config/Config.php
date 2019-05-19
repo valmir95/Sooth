@@ -27,9 +27,9 @@ class Config{
     /**
      * String representing type of adapter, ex. MySQL
      *
-     * @var AdapterConfig
+     * @var string
      */
-    private $adapterConfig;
+    private $adapter;
 
     /**
      * String representing the host
@@ -74,9 +74,9 @@ class Config{
     private $charset;
 
 
-    public function __construct($adapterConfig, $host, $database, $user, $pass, $port, $charset)
+    public function __construct($adapter, $host, $database, $user, $pass, $port, $charset)
     {
-        $this->adapterConfig = $adapterConfig;
+        $this->adapter = $adapter;
         $this->host = $host;
         $this->database = $database;
         $this->user = $user;
@@ -95,10 +95,9 @@ class Config{
         if(file_exists($configPath)){
             $configJson = file_get_contents($configPath);
             $configAssoc = json_decode($configJson, true);
-            $adapterConfig = new AdapterConfig(strtolower($configAssoc['adapter']['name']), strtolower($configAssoc['adapter']['extension']));
         
             return new Config(
-                $adapterConfig, $configAssoc['host'], 
+                $configAssoc['adapter'], $configAssoc['host'], 
                 $configAssoc['database'], $configAssoc['user'], 
                 $configAssoc['pass'], $configAssoc['port'],
                 $configAssoc['charset']
@@ -108,13 +107,15 @@ class Config{
     }
 
 
+
+
     /**
      * Getter for adapter
      *
-     * @return AdapterConfig
+     * @return string
      */
-    public function getAdapterConfig(){
-        return $this->adapterConfig;
+    public function getAdapter(){
+        return $this->adapter;
     }
     /**
      * Getter for host
