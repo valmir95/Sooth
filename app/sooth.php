@@ -23,10 +23,11 @@
  * IN THE SOFTWARE.
  */
 
-require __DIR__ . "/../src/Config/AdapterConfig.php";
 require __DIR__ . "/../src/Config/Config.php";
+require __DIR__ . "/../src/Database/AdapterFactory.php";
 require __DIR__ . "/../src/Database/DatabaseAdapter.php";
 require __DIR__ . "/../src/Database/MySqlAdapter.php";
+require __DIR__ . "/../src/Util/FileStructure.php";
 require __DIR__ . "/../src/ArgumentAnalyzer.php";
 require __DIR__ . "/../src/SoothApp.php";
 

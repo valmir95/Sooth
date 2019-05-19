@@ -22,7 +22,7 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
  */
-
+//TODO: Too much is done in ArgumentAnalyzer class. Needs other
 class ArgumentAnalyzer{
 
     const MIGRATION_ROOT_DIR = "SoothMigrations";
@@ -99,18 +99,8 @@ class ArgumentAnalyzer{
      */
     //TODO: Needs to be refactored.
     private function init(){
-        if(!file_exists(self::MIGRATION_ROOT_DIR)){
-            mkdir(self::MIGRATION_ROOT_DIR . "/migrations", 0777, true);
-            $configFile = fopen(self::MIGRATION_ROOT_DIR . "/config.json", "w");
-            $defaultConfig = ['adapter' => ['name' => 'mysql', 'extension' => ''], 'host' => '127.0.0.1', 'database' => 'dev_db', 'user' => 'root', 'pass' => '', 'port' => 3306, 'charset' => 'utf8'];
-            $completedMigrationsFile = fopen(self::MIGRATION_ROOT_DIR . "/completedMigs.json", "w");
-            $defaultCompletedMigrationsContent = ['completed' => []];
-            fwrite($completedMigrationsFile, json_encode($defaultCompletedMigrationsContent, JSON_PRETTY_PRINT));
-            fwrite($configFile, json_encode($defaultConfig, JSON_PRETTY_PRINT));
-        }
-        else{
-            throw new Exception("Sooth has already been initialized. Delete SoothMigrations directory for new initialization");
-        }
+        $fileStructure = new FileStructure(self::MIGRATION_ROOT_DIR);
+        $fileStructure->createMigrationStructure();
     }
 
     /**
@@ -125,7 +115,7 @@ class ArgumentAnalyzer{
             $migrationFileNames = array_diff(scandir($directory), array('..', '.'));
             $completedMigrationsFileContent = file_get_contents(self::MIGRATION_ROOT_DIR . "/completedMigs.json");
             $completedMigrationsFileAssoc = json_decode($completedMigrationsFileContent, true);
-            $databaseAdapter = $this->getAdapterObject();
+            $databaseAdapter = AdapterFactory::getAdapter($this->config->getAdapter(), $this->config);
             $databaseAdapter->connect();
             
             foreach($migrationFileNames as $fileName){
@@ -179,21 +169,5 @@ class ArgumentAnalyzer{
         else{
             throw new Exception('Migration syntax invalid. The syntax is "Sooth create <migration_name>"');
         }
-    }
-
-    /**
-     * Get adapter from config file
-     *
-     * @return DatabaseAdapter|null
-     */
-    //TODO: Belongs in another class?
-    private function getAdapterObject(){
-        if(!is_null($this->config)){
-            if($this->config->getAdapterConfig()->getAdapterName() == 'mysql'){
-                return new MySqlAdapter($this->config);
-            }
-            throw new Exception($this->config->getAdapterConfig()->getAdapterName() . " adapter not supported.");
-        }
-        throw new Exception("Config file is missing.");
     }
 }
