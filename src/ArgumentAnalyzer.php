@@ -166,9 +166,10 @@ class ArgumentAnalyzer{
             $migrationName = $this->args[1];
             if(file_exists(self::MIGRATION_ROOT_DIR . "/migrations") && !is_null($this->config)){
                 $migrationTimeStamp = time();
-                $migrationFileName = $migrationTimeStamp . "_migration_" . $migrationName . ".json";
+                $uniqueId = bin2hex(openssl_random_pseudo_bytes(32));
+                $migrationFileName = "migration_" . $migrationName . "_" . $uniqueId  . ".json";
                 $migrationFile = fopen(self::MIGRATION_ROOT_DIR . "/migrations/" . $migrationFileName, "w");
-                $migrationFileAssoc = ['uniqueId' => uniqid("", true), 'createdAt' => $migrationTimeStamp, 'migrationName' => $migrationName ,'query' => ""];
+                $migrationFileAssoc = ['uniqueId' => $uniqueId, 'createdAt' => $migrationTimeStamp, 'migrationName' => $migrationName ,'query' => ""];
                 fwrite($migrationFile, json_encode($migrationFileAssoc, JSON_PRETTY_PRINT));
             }
             else{
