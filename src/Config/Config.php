@@ -87,7 +87,7 @@ class Config{
         if(file_exists($configPath)){
             $configJson = file_get_contents($configPath);
             $configAssoc = json_decode($configJson, true);
-            $adapterConfig = new AdapterConfig($configAssoc['adapter']['name'], $configAssoc['adapter']['extension']);
+            $adapterConfig = new AdapterConfig(strtolower($configAssoc['adapter']['name']), strtolower($configAssoc['adapter']['extension']));
         
             return new Config(
                 $adapterConfig, $configAssoc['host'], 
