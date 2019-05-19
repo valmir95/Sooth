@@ -26,13 +26,6 @@ class MySqlAdapter implements DatabaseAdapter{
     
     //TODO: Needs to get better. Create interface for extensions? (mysqli pdo interface).
     const SUPPORTED_EXTENSIONS = ['mysqli'];
-    
-    /**
-     * MySql extensions type ex. Mysqli, PDO.
-     *
-     * @param string $extensionType
-     */
-    private $extensionType;
 
     /**
      * A config.php class representing the data from config.json.
@@ -48,18 +41,23 @@ class MySqlAdapter implements DatabaseAdapter{
      */
     private $extensionObject;
 
-    public function __construct($config, $extensionType)
+    public function __construct($config)
     {
-        //TODO: Needs to get better. Create interface for extensions? (mysqli pdo interface)
-        if(!in_array(strtolower($extensionType), self::SUPPORTED_EXTENSIONS)){
-            throw new Exception("Extensiontype $extensionType not supported");
-        }
-        $this->extensionType = $extensionType;
         $this->config = $config;
+        $this->extensionObject = null;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @return void
+     */
     public function connect(){
-        if($this->extensionType == 'mysqli'){
+
+        if(!empty($this->config->getAdapterConfig()->getExtensionName()) && !in_array($this->config->getAdapterConfig()->getExtensionName(), self::SUPPORTED_EXTENSIONS)){
+            throw new Exception("Extension " . $this->config->getAdapterConfig()->getExtensionName() .  " not supported");
+        }
+        if($this->isMysqli()){
             $this->extensionObject = new mysqli(
                 $this->config->getHost(), 
                 $this->config->getUser(), 
@@ -70,25 +68,30 @@ class MySqlAdapter implements DatabaseAdapter{
                 throw new Exception("Could not connect to db!");
             }
         }
-        else if($this->extensionType == 'pdo'){
-
-        }
     }
     /**
      * {@inheritDoc}
      */
     //TODO: Needs to get better. Create interface for extensions? (mysqli pdo interface).
-    public function executeQuery($query)
-    {
-        if($this->extensionType == 'mysqli'){
+    public function executeQuery($query){
+        if(is_null($this->extensionObject)){
+            throw new Exception("Extension object not set. Adapter needs to run connect() before executing query");
+        }
+
+        if($this->isMysqli()){
             $queryResult = $this->extensionObject->query($query);
             if(!$queryResult){
                 throw new Exception($this->extensionObject->error);
             }
             return $queryResult;
         }
-        else if($this->extensionType == 'pdo'){
+    }
 
-        }
+    private function isMysqli(){
+        return $this->config->getAdapterConfig()->getExtensionName() == 'mysqli' || empty($this->config->getAdapterConfig()->getExtensionName());
+    }
+    
+    private function isPdo(){
+        return $this->config->getAdapterConfig()->getExtensionName() == 'pdo';
     }
 }
