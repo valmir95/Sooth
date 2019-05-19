@@ -81,7 +81,7 @@ class Config{
      *
      * @return string
      */
-    function getAdapter(){
+    public function getAdapter(){
         return $this->adapter;
     }
     /**
@@ -89,7 +89,7 @@ class Config{
      *
      * @return string
      */
-    function getHost(){
+    public function getHost(){
         return $this->host;
     }
     /**
@@ -97,7 +97,7 @@ class Config{
      *
      * @return string
      */
-    function getDatabase(){
+    public function getDatabase(){
         return $this->database;
     }
     /**
@@ -105,7 +105,7 @@ class Config{
      *
      * @return string
      */
-    function getUser(){
+    public function getUser(){
         return $this->user;
     }
     /**
@@ -113,7 +113,7 @@ class Config{
      *
      * @return string
      */
-    function getPass(){
+    public function getPass(){
         return $this->pass;
     }
     /**
@@ -121,7 +121,9 @@ class Config{
      *
      * @return int
      */
-    function getPort(){
+    public function getPort(){
         return $this->port;
     }
+
+    
 }
