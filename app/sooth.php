@@ -22,6 +22,8 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
  */
+
+require __DIR__ . "/../src/Config/AdapterConfig.php";
 require __DIR__ . "/../src/Config/Config.php";
 require __DIR__ . "/../src/Database/DatabaseAdapter.php";
 require __DIR__ . "/../src/Database/MySqlAdapter.php";
@@ -32,7 +34,7 @@ require __DIR__ . "/../src/SoothApp.php";
 try{
     array_shift($argv);
     $configPath = 'SoothMigrations/config.json';
-    $config = Config::fromJsonPath($configPath);
+    $config = Config::fromJsonFile($configPath);
     $app = new SoothApp($config, $argv);
     $app->run();
 }
