@@ -24,23 +24,28 @@
  */
 class MySqlAdapter implements DatabaseAdapter{
     
-    //TODO: Needs to get better. Create interface for extensions? (mysqli pdo interface)
+    //TODO: Needs to get better. Create interface for extensions? (mysqli pdo interface).
     const SUPPORTED_EXTENSIONS = ['mysqli'];
     
     /**
-     * MySql extensions type ex. Mysqli, PDO
+     * MySql extensions type ex. Mysqli, PDO.
      *
      * @param string $extensionType
      */
     private $extensionType;
 
     /**
-     * A config.php class representing the data from config.json
+     * A config.php class representing the data from config.json.
      *
      * @var Config
      */
     private $config;
 
+    /**
+     * Represents the actual extension type in object form.
+     *
+     * @var object
+     */
     private $extensionObject;
 
     public function __construct($config, $extensionType)
@@ -72,7 +77,7 @@ class MySqlAdapter implements DatabaseAdapter{
     /**
      * {@inheritDoc}
      */
-    //TODO: Needs to get better. Create interface for extensions? (mysqli pdo interface)
+    //TODO: Needs to get better. Create interface for extensions? (mysqli pdo interface).
     public function executeQuery($query)
     {
         if($this->extensionType == 'mysqli'){
