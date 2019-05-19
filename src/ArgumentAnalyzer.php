@@ -97,6 +97,7 @@ class ArgumentAnalyzer{
      *
      * @return void
      */
+    //TODO: Needs to be refactored.
     private function init(){
         if(!file_exists(self::MIGRATION_ROOT_DIR)){
             mkdir(self::MIGRATION_ROOT_DIR . "/migrations", 0777, true);
@@ -117,6 +118,7 @@ class ArgumentAnalyzer{
      *
      * @return void
      */
+    //TODO: Needs to be refactored.
     private function migrate(){
         $directory = self::MIGRATION_ROOT_DIR . "/migrations/";
         if(file_exists($directory) && !is_null($this->config)){
@@ -158,6 +160,7 @@ class ArgumentAnalyzer{
      *
      * @return void
      */
+    //TODO: Needs to be refactored.
     private function create(){
         if(count($this->args) == 2){
             $migrationName = $this->args[1];
@@ -182,6 +185,7 @@ class ArgumentAnalyzer{
      *
      * @return DatabaseAdapter|null
      */
+    //TODO: Belongs in another class?
     private function getAdapterObject(){
         if(!is_null($this->config)){
             if($this->config->getAdapter() == 'mysql'){
@@ -189,6 +193,6 @@ class ArgumentAnalyzer{
             }
             throw new Exception($this->config->getAdapter() . " adapter not supported.");
         }
-        throw new Exception("Config file is missing.")
+        throw new Exception("Config file is missing.");
     }
 }
