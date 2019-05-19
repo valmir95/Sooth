@@ -41,11 +41,19 @@ class ArgumentAnalyzer{
      */
     private $args;
 
+    /**
+     * Database adapter object
+     *
+     * @var DatabaseAdapter
+     */
+    private $databaseAdapter;
+
 
 
     public function __construct($config, $args){
         $this->config = $config;
         $this->args = $args;
+        $this->databaseAdapter = null;
     }
 
 
@@ -115,6 +123,8 @@ class ArgumentAnalyzer{
             $migrationFileNames = array_diff(scandir($directory), array('..', '.'));
             $completedMigrationsFileContent = file_get_contents(self::MIGRATION_ROOT_DIR . "/completedMigs.json");
             $completedMigrationsFileAssoc = json_decode($completedMigrationsFileContent, true);
+            $databaseAdapter = $this->getAdapterObject();
+            $databaseAdapter->connect();
             
             foreach($migrationFileNames as $fileName){
                 if(!in_array($fileName, $completedMigrationsFileAssoc['completed'])){
@@ -122,8 +132,14 @@ class ArgumentAnalyzer{
                     $migrationFileAssoc = json_decode($migrationFileContent,true);
                     //Run for every query
                     //TODO: Keep an error tally for every query and store that error message/count for every element in completedMigs.json?
-                    //runSql($migrationFileAssoc['query']);
-                    echo $fileName . " Sucessfully migrated \n";
+                    try {
+                        $databaseAdapter->executeQuery($migrationFileAssoc['query']);
+                        echo $fileName . " Sucessfully migrated \n";
+                    } catch (Exception $ex) {
+                        throw new Exception($fileName . " migration failed. Error: " . $ex->getMessage());
+                    }
+                    
+                    
                     $completedMigrationsFileAssoc['completed'][] = $fileName;
                 }
             }
@@ -159,5 +175,20 @@ class ArgumentAnalyzer{
         else{
             throw new Exception('Migration syntax invalid. The syntax is "Sooth create <migration_name>"');
         }
+    }
+
+    /**
+     * Get adapter from config file
+     *
+     * @return DatabaseAdapter|null
+     */
+    private function getAdapterObject(){
+        if(!is_null($this->config)){
+            if($this->config->getAdapter() == 'mysql'){
+                return new MySqlAdapter($this->config, 'mysqli');
+            }
+            throw new Exception($this->config->getAdapter() . " adapter not supported.");
+        }
+        throw new Exception("Config file is missing.")
     }
 }
