@@ -66,8 +66,15 @@ class Config{
      */
     private $port;
 
+    /**
+     * String representing the charset
+     *
+     * @var string
+     */
+    private $charset;
 
-    public function __construct($adapterConfig, $host, $database, $user, $pass, $port)
+
+    public function __construct($adapterConfig, $host, $database, $user, $pass, $port, $charset)
     {
         $this->adapterConfig = $adapterConfig;
         $this->host = $host;
@@ -75,6 +82,7 @@ class Config{
         $this->user = $user;
         $this->pass = $pass;
         $this->port = $port;
+        $this->charset = $charset;
     }
 
     /**
@@ -92,7 +100,8 @@ class Config{
             return new Config(
                 $adapterConfig, $configAssoc['host'], 
                 $configAssoc['database'], $configAssoc['user'], 
-                $configAssoc['pass'], $configAssoc['port']
+                $configAssoc['pass'], $configAssoc['port'],
+                $configAssoc['charset']
             );
         }
         return null;
@@ -146,6 +155,15 @@ class Config{
      */
     public function getPort(){
         return $this->port;
+    }
+
+    /**
+     * Getter for charset
+     *
+     * @return string
+     */
+    public function getCharset(){
+        return $this->charset;
     }
 
     
