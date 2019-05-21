@@ -37,13 +37,14 @@ class AdapterFactory{
      *
      * @param string $className
      * @param Config $config
-     * @return DatabaseAdapter
+     * @return DatabaseAdapter|null
      */
-    public static function getAdapter($adapterName, $config){
-        if(empty(self::REGISTERED_ADAPTERS[$adapterName])){
-            throw new Exception($adapterName . " is not supported.");
+    public static function getAdapter($config){
+        if(is_null($config)) return null;
+        if(empty(self::REGISTERED_ADAPTERS[$config->getAdapter()])){
+            throw new Exception($config->getAdapter() . " is not supported.");
         }
-        $adapterClassName = self::REGISTERED_ADAPTERS[$adapterName];
+        $adapterClassName = self::REGISTERED_ADAPTERS[$config->getAdapter()];
 
         return new $adapterClassName($config);
     }
