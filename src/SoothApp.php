@@ -39,15 +39,15 @@ class SoothApp{
     private $recordMigrator;
 
     /**
-     * User arguments
+     * User command
      *
-     * @var string
+     * @var Command
      */
-    private $args;
+    private $command;
 
-    public function __construct($config, $recordMigrator, $args){
+    public function __construct($config, $recordMigrator, $command){
         $this->config = $config;
-        $this->args = $args;
+        $this->command = $command;
         $this->recordMigrator = $recordMigrator;
     }
 
@@ -58,7 +58,7 @@ class SoothApp{
      * @return void
      */
     public function run(){
-        $argumentAnalyzer = new ArgumentAnalyzer($this->config, $this->recordMigrator, $this->args);
+        $argumentAnalyzer = new CommandAnalyzer($this->config, $this->recordMigrator, $this->command);
         $argumentAnalyzer->executeArgs();
     }
 }

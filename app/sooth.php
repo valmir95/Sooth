@@ -24,24 +24,25 @@
  */
 require __DIR__ . "/../src/Util/UUID.php";
 require __DIR__ . "/../src/Config/Config.php";
+require __DIR__ . "/../src/Command/Command.php";
 require __DIR__ . "/../src/Database/AdapterFactory.php";
 require __DIR__ . "/../src/Database/DatabaseAdapter.php";
 require __DIR__ . "/../src/Database/MySqlAdapter.php";
 require __DIR__ . "/../src/Migration/MigrationStructure.php";
 require __DIR__ . "/../src/Migration/RecordMigrator.php";
-require __DIR__ . "/../src/ArgumentAnalyzer.php";
+require __DIR__ . "/../src/Command/CommandAnalyzer.php";
 require __DIR__ . "/../src/SoothApp.php";
 
 
 try{
-    array_shift($argv);
+    $command = Command::fromArgv($argv);
     $configPath = 'SoothMigrations/config.json';
     $migrationRootDir = "SoothMigrations";
     $config = Config::fromJsonFile($configPath);
     $databaseAdapter = AdapterFactory::getAdapter($config);
     $migrationStructure = new MigrationStructor($migrationRootDir);
     $recordMigrator = new RecordMigrator($config, $databaseAdapter, $migrationStructure);
-    $app = new SoothApp($config, $recordMigrator, $argv);
+    $app = new SoothApp($config, $recordMigrator, $command);
     $app->run();
 }
 catch(Exception $ex){
