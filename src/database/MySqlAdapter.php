@@ -53,7 +53,6 @@ class MySqlAdapter implements DatabaseAdapter{
 
         //TODO: Look over more options
         $options = [
-            PDO::ATTR_EMULATE_PREPARES   => false, // turn off emulation mode for "real" prepared statements
             PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION, //turn on errors in the form of exceptions
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC, //make the default fetch be an associative array
         ];
@@ -65,11 +64,10 @@ class MySqlAdapter implements DatabaseAdapter{
      */
     //TODO: Needs to get better. Create interface for extensions? (mysqli pdo interface).
     public function executeQuery($query){
-
         if(is_null($this->pdo)){
             throw new Exception("Extension object not set. Adapter needs to run connect() before executing query");
         }
         
-        $result = $this->pdo->query($query);
+        $this->pdo->exec($query);
     }
 }
