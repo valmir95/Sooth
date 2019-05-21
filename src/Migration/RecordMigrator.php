@@ -93,8 +93,8 @@ class RecordMigrator{
     public function createRecord($migrationName){
         if(file_exists($this->migrationStructure->getMigrationRootDir() . "/migrations") && !is_null($this->config)){
             $migrationTimeStamp = time();
-            $uniqueId = bin2hex(openssl_random_pseudo_bytes(32));
-            $migrationFileName = "migration_" . $migrationName . "_" . $uniqueId  . ".json";
+            $uniqueId = UUID::v4();
+            $migrationFileName = $migrationTimeStamp . "_" . $migrationName . "_" . $uniqueId  . ".json";
             $migrationFile = fopen($this->migrationStructure->getMigrationRootDir() . "/migrations/" . $migrationFileName, "w");
             $migrationFileAssoc = ['uniqueId' => $uniqueId, 'createdAt' => $migrationTimeStamp, 'migrationName' => $migrationName ,'query' => ""];
             fwrite($migrationFile, json_encode($migrationFileAssoc, JSON_PRETTY_PRINT));

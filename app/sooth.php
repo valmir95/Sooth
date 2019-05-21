@@ -22,7 +22,7 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
  */
-
+require __DIR__ . "/../src/Util/UUID.php";
 require __DIR__ . "/../src/Config/Config.php";
 require __DIR__ . "/../src/Database/AdapterFactory.php";
 require __DIR__ . "/../src/Database/DatabaseAdapter.php";
