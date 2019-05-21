@@ -31,9 +31,24 @@ class SoothApp{
      */
     private $config;
 
-    public function __construct($config, $args){
+    /**
+     * RecordMigrator class
+     *
+     * @var RecordMigrator
+     */
+    private $recordMigrator;
+
+    /**
+     * User arguments
+     *
+     * @var string
+     */
+    private $args;
+
+    public function __construct($config, $recordMigrator, $args){
         $this->config = $config;
         $this->args = $args;
+        $this->recordMigrator = $recordMigrator;
     }
 
     /**
@@ -43,7 +58,7 @@ class SoothApp{
      * @return void
      */
     public function run(){
-        $argumentAnalyzer = new ArgumentAnalyzer($this->config, $this->args);
+        $argumentAnalyzer = new ArgumentAnalyzer($this->config, $this->recordMigrator, $this->args);
         $argumentAnalyzer->executeArgs();
     }
 }

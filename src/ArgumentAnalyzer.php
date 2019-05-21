@@ -22,10 +22,7 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
  */
-//TODO: Too much is done in ArgumentAnalyzer class. Needs other
 class ArgumentAnalyzer{
-
-    const MIGRATION_ROOT_DIR = "SoothMigrations";
 
     /**
      * A config.php class representing the data from config.json
@@ -42,18 +39,25 @@ class ArgumentAnalyzer{
     private $args;
 
     /**
-     * Database adapter object
+     * RecordMigrator class
      *
-     * @var DatabaseAdapter
+     * @var RecordMigrator
      */
-    private $databaseAdapter;
+    private $recordMigrator;
 
 
 
-    public function __construct($config, $args){
+    /**
+     * Constructor
+     *
+     * @param Config $config
+     * @param RecordMigrator $recordMigrator
+     * @param array $args
+     */
+    public function __construct($config, $recordMigrator, $args){
         $this->config = $config;
+        $this->recordMigrator = $recordMigrator;
         $this->args = $args;
-        $this->databaseAdapter = null;
     }
 
 
@@ -97,10 +101,8 @@ class ArgumentAnalyzer{
      *
      * @return void
      */
-    //TODO: Needs to be refactored.
     private function init(){
-        $fileStructure = new FileStructure(self::MIGRATION_ROOT_DIR);
-        $fileStructure->createMigrationStructure();
+        $this->recordMigrator->getMigrationStructure()->createMigrationStructure();
     }
 
     /**
@@ -108,41 +110,8 @@ class ArgumentAnalyzer{
      *
      * @return void
      */
-    //TODO: Needs to be refactored.
     private function migrate(){
-        $directory = self::MIGRATION_ROOT_DIR . "/migrations/";
-        if(file_exists($directory) && !is_null($this->config)){
-            $migrationFileNames = array_diff(scandir($directory), array('..', '.'));
-            $completedMigrationsFileContent = file_get_contents(self::MIGRATION_ROOT_DIR . "/completedMigs.json");
-            $completedMigrationsFileAssoc = json_decode($completedMigrationsFileContent, true);
-            $databaseAdapter = AdapterFactory::getAdapter($this->config->getAdapter(), $this->config);
-            $databaseAdapter->connect();
-            
-            foreach($migrationFileNames as $fileName){
-                if(!in_array($fileName, $completedMigrationsFileAssoc['completed'])){
-                    $migrationFileContent = file_get_contents(self::MIGRATION_ROOT_DIR . "/migrations/" . $fileName);
-                    $migrationFileAssoc = json_decode($migrationFileContent,true);
-                    //Run for every query
-                    //TODO: Keep an error tally for every query and store that error message/count for every element in completedMigs.json?
-                    try {
-                        $databaseAdapter->executeQuery($migrationFileAssoc['query']);
-                        echo $fileName . " Sucessfully migrated \n";
-                    } catch (Exception $ex) {
-                        throw new Exception($fileName . " migration failed. Error: " . $ex->getMessage());
-                    }
-                    
-                    
-                    $completedMigrationsFileAssoc['completed'][] = $fileName;
-                }
-            }
-    
-            $completedMigrationsFile = fopen(self::MIGRATION_ROOT_DIR . "/completedMigs.json", "w");
-            fwrite($completedMigrationsFile, json_encode($completedMigrationsFileAssoc, JSON_PRETTY_PRINT));
-        }
-        else{
-            throw new Exception('Migration structure not properly set. Have you ran "Sooth init" ?');
-        }
-        
+        $this->recordMigrator->migrateRecords();
     }
 
     /**
@@ -150,21 +119,10 @@ class ArgumentAnalyzer{
      *
      * @return void
      */
-    //TODO: Needs to be refactored.
     private function create(){
         if(count($this->args) == 2){
             $migrationName = $this->args[1];
-            if(file_exists(self::MIGRATION_ROOT_DIR . "/migrations") && !is_null($this->config)){
-                $migrationTimeStamp = time();
-                $uniqueId = bin2hex(openssl_random_pseudo_bytes(32));
-                $migrationFileName = "migration_" . $migrationName . "_" . $uniqueId  . ".json";
-                $migrationFile = fopen(self::MIGRATION_ROOT_DIR . "/migrations/" . $migrationFileName, "w");
-                $migrationFileAssoc = ['uniqueId' => $uniqueId, 'createdAt' => $migrationTimeStamp, 'migrationName' => $migrationName ,'query' => ""];
-                fwrite($migrationFile, json_encode($migrationFileAssoc, JSON_PRETTY_PRINT));
-            }
-            else{
-                throw new Exception('Migration structure not properly set. Have you ran "Sooth init" ?');
-            }
+            $this->recordMigrator->createRecord($migrationName);
         }
         else{
             throw new Exception('Migration syntax invalid. The syntax is "Sooth create <migration_name>"');
