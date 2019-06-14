@@ -23,6 +23,7 @@
  * IN THE SOFTWARE.
  */
 require __DIR__ . "/../src/Util/UUID.php";
+require __DIR__ . "/../src/Migration/Version.php";
 require __DIR__ . "/../src/Config/Config.php";
 require __DIR__ . "/../src/Command/Command.php";
 require __DIR__ . "/../src/Database/AdapterFactory.php";
@@ -40,7 +41,7 @@ try{
     $migrationRootDir = "SoothMigrations";
     $config = Config::fromJsonFile($configPath);
     $databaseAdapter = AdapterFactory::getAdapter($config);
-    $migrationStructure = new MigrationStructor($migrationRootDir);
+    $migrationStructure = new MigrationStructure($migrationRootDir);
     $recordMigrator = new RecordMigrator($config, $databaseAdapter, $migrationStructure);
     $app = new SoothApp($config, $recordMigrator, $command);
     $app->run();

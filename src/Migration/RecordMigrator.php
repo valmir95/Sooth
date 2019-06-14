@@ -45,6 +45,13 @@ class RecordMigrator{
     private $migrationStructure;
 
     /**
+     * Latest migration version
+     *
+     * @var Version
+     */
+    private $latestMigrationVersion;
+
+    /**
      * RecordMigrator constructor
      *
      * @param Config $config
@@ -55,24 +62,27 @@ class RecordMigrator{
         $this->config = $config;
         $this->databaseAdapter = $databaseAdapter;
         $this->migrationStructure = $migrationStructure;
+        //Default
+        $this->latestMigrationVersion = new Version(1, 0, 0);
     }
 
 
     /**
      * Migrates all records from migrations folder
-     *
+     * Takes a Version parameter to upgrade to that specific version
+     * @param Version $version
      * @return void
      */
-    public function migrateRecords(){
+    public function migrateRecords(Version $version = null){
         $directory = $this->migrationStructure->getMigrationRootDir() . "/migrations/";
         if(file_exists($directory) && !is_null($this->config)){
-            $migrationFileNames = array_diff(scandir($directory), array('..', '.'));
+            $migrationFileNames = $this->migrationStructure->getMigrationFiles();
             $completedMigrationsFileContent = file_get_contents($this->migrationStructure->getMigrationRootDir() . "/completedMigs.json");
             $completedMigrationsFileAssoc = json_decode($completedMigrationsFileContent, true);
             $this->databaseAdapter->connect();
             
             foreach($migrationFileNames as $fileName){
-                $this->migrateRecord($fileName, $completedMigrationsFileAssoc);
+                $this->migrateRecord($fileName, $completedMigrationsFileAssoc, $version);
             }
     
             $completedMigrationsFile = fopen($this->migrationStructure->getMigrationRootDir() . "/completedMigs.json", "w");
@@ -83,20 +93,52 @@ class RecordMigrator{
         }
     }
 
+    /**
+     * Migrates a single record
+     *
+     * @param string $fileName
+     * @param array $completedMigrationsFileAssoc
+     * @param Version $version
+     * @return void
+     */
+    private function migrateRecord($fileName, &$completedMigrationsFileAssoc, $version){
+        if(!in_array($fileName, $completedMigrationsFileAssoc['completed'])){
+            $migrationFileContent = file_get_contents($this->migrationStructure->getMigrationRootDir() . "/migrations/" . $fileName);
+            $migrationFileAssoc = json_decode($migrationFileContent,true);
+            if(!empty(trim($migrationFileAssoc['query']))){
+                if(!is_null($version)){
+                    $recordVersion = Version::stringToVersion($migrationFileAssoc['version']);
+                    $versionComparison = Version::compareVersions($version, $recordVersion);
+                }
+                if(is_null($version) || ($versionComparison == 0 || $versionComparison == 1)){
+                    try {
+                        $this->databaseAdapter->executeQuery($migrationFileAssoc['query']);
+                        echo $fileName . " Sucessfully migrated \n";
+                    } catch (Exception $ex) {
+                        throw new Exception($fileName . " migration failed. Error: " . $ex->getMessage());
+                    }
+                    $completedMigrationsFileAssoc['completed'][] = $fileName;
+                }
+            }
+        }
+    }
+
 
     /**
      * Creates a single migration-record
      *
      * @param string $migrationName
+     * @param int $version
      * @return void
      */
-    public function createRecord($migrationName){
+    public function createRecord($migrationName, $version = null){
         if(file_exists($this->migrationStructure->getMigrationRootDir() . "/migrations") && !is_null($this->config)){
+            if(is_null($version)) $version = $this->latestMigrationVersion;
             $migrationTimeStamp = time();
             $uniqueId = UUID::v4();
-            $migrationFileName = $migrationTimeStamp . "_" . $migrationName . "_" . $uniqueId  . ".json";
+            $migrationFileName = $migrationTimeStamp . "_" . $migrationName . ".json";
             $migrationFile = fopen($this->migrationStructure->getMigrationRootDir() . "/migrations/" . $migrationFileName, "w");
-            $migrationFileAssoc = ['uniqueId' => $uniqueId, 'createdAt' => $migrationTimeStamp, 'migrationName' => $migrationName ,'query' => ""];
+            $migrationFileAssoc = ['uniqueId' => $uniqueId, 'version' => $version->getFormattedVersionString(), 'createdAt' => $migrationTimeStamp, 'migrationName' => $migrationName ,'query' => ""];
             fwrite($migrationFile, json_encode($migrationFileAssoc, JSON_PRETTY_PRINT));
         }
         else{
@@ -104,18 +146,8 @@ class RecordMigrator{
         }
     }
 
-    private function migrateRecord($fileName, &$completedMigrationsFileAssoc){
-        if(!in_array($fileName, $completedMigrationsFileAssoc['completed'])){
-            $migrationFileContent = file_get_contents($this->migrationStructure->getMigrationRootDir() . "/migrations/" . $fileName);
-            $migrationFileAssoc = json_decode($migrationFileContent,true);
-            try {
-                $this->databaseAdapter->executeQuery($migrationFileAssoc['query']);
-                echo $fileName . " Sucessfully migrated \n";
-            } catch (Exception $ex) {
-                throw new Exception($fileName . " migration failed. Error: " . $ex->getMessage());
-            }
-            $completedMigrationsFileAssoc['completed'][] = $fileName;
-        }
+    private function getLatestVersionFromFiles(){
+
     }
 
     /**

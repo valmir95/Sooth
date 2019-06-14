@@ -22,7 +22,7 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
  */
-class MigrationStructor{
+class MigrationStructure{
 
     private $migrationRootDir;
 
@@ -40,6 +40,19 @@ class MigrationStructor{
         else{
             throw new Exception("Sooth has already been initialized. Delete SoothMigrations directory for new initialization");
         }
+    }
+
+    /**
+     * Gets all migration files
+     *
+     * @return array
+     */
+    public function getMigrationFiles(){
+        $directory = $this->getMigrationRootDir() . "/migrations/";
+        if(file_exists($directory)){
+            return array_diff(scandir($directory), array('..', '.'));
+        }
+        throw new Exception('Migration structure not properly set. Have you ran "Sooth init" ?');
     }
 
     private function createMigrationFolders(){
