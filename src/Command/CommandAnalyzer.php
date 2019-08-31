@@ -113,12 +113,8 @@ class CommandAnalyzer{
      * @return void
      */
     private function migrate(){
-        if (count($this->command->getSubCommandTerms()) == 0 || count($this->command->getSubCommandTerms()) == 1){
-            $version = null;
-            if(count($this->command->getSubCommandTerms()) == 1){
-                $version = Version::stringToVersion($this->command->getSubCommandTerms()[0]);
-            }
-            $this->recordMigrator->migrateRecords($version);
+        if (count($this->command->getSubCommandTerms()) == 0){
+            $this->recordMigrator->migrateRecords();
         }
         else{
             throw new Exception('Migration syntax invalid. The syntax is "bin/vendor/sooth migrate"');
@@ -133,8 +129,7 @@ class CommandAnalyzer{
     private function create(){
         if(count($this->command->getSubCommandTerms()) == 1){
             $migrationName = $this->command->getSubCommandTerms()[0];
-            $version = null;
-            $this->recordMigrator->createRecord($migrationName, $version);
+            $this->recordMigrator->createRecord($migrationName);
         }
         else{
             throw new Exception('Migration syntax invalid. The syntax is "bin/vendor/sooth create <migration_name>"');

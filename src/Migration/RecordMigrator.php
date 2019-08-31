@@ -131,7 +131,7 @@ class RecordMigrator{
                                     $migrationTimeStamp . '" #Unix timestamp of file-creation' .
                                     "\n" . 'migration_name = "' .
                                     $migrationName . '" #Name of migration' . "\n" . 
-                                     'query = """ """' . '#Paste valid query between the multi-line marks';
+                                     'query = """ """' . ' #Paste valid query between the multi-line marks';
             fwrite($migrationFile, $migrationFileContent);
         }
         else{
