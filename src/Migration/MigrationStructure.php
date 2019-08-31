@@ -50,7 +50,7 @@ class MigrationStructure{
     public function getMigrationFiles(){
         $directory = $this->getMigrationRootDir() . "/migrations/";
         if(file_exists($directory)){
-            return array_diff(scandir($directory), array('..', '.'));
+            return array_map('basename', glob($directory . "*.toml"));
         }
         throw new Exception('Migration structure not properly set. Have you ran "Sooth init" ?');
     }
