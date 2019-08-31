@@ -22,6 +22,10 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
  */
+
+use Yosymfony\Toml\Toml;
+use Yosymfony\Toml\TomlBuilder;
+
 class RecordMigrator{
 
     /**
@@ -45,13 +49,6 @@ class RecordMigrator{
     private $migrationStructure;
 
     /**
-     * Latest migration version
-     *
-     * @var Version
-     */
-    private $latestMigrationVersion;
-
-    /**
      * RecordMigrator constructor
      *
      * @param Config $config
@@ -62,18 +59,14 @@ class RecordMigrator{
         $this->config = $config;
         $this->databaseAdapter = $databaseAdapter;
         $this->migrationStructure = $migrationStructure;
-        //Default
-        $this->latestMigrationVersion = new Version(1, 0, 0);
     }
 
 
     /**
      * Migrates all records from migrations folder
-     * Takes a Version parameter to upgrade to that specific version
-     * @param Version $version
      * @return void
      */
-    public function migrateRecords(Version $version = null){
+    public function migrateRecords(){
         $directory = $this->migrationStructure->getMigrationRootDir() . "/migrations/";
         if(file_exists($directory) && !is_null($this->config)){
             $migrationFileNames = $this->migrationStructure->getMigrationFiles();
@@ -82,7 +75,7 @@ class RecordMigrator{
             $this->databaseAdapter->connect();
             
             foreach($migrationFileNames as $fileName){
-                $this->migrateRecord($fileName, $completedMigrationsFileAssoc, $version);
+                $this->migrateRecord($fileName, $completedMigrationsFileAssoc);
             }
     
             $completedMigrationsFile = fopen($this->migrationStructure->getMigrationRootDir() . "/completedMigs.json", "w");
@@ -98,27 +91,19 @@ class RecordMigrator{
      *
      * @param string $fileName
      * @param array $completedMigrationsFileAssoc
-     * @param Version $version
      * @return void
      */
-    private function migrateRecord($fileName, &$completedMigrationsFileAssoc, $version){
+    private function migrateRecord($fileName, &$completedMigrationsFileAssoc){
         if(!in_array($fileName, $completedMigrationsFileAssoc['completed'])){
-            $migrationFileContent = file_get_contents($this->migrationStructure->getMigrationRootDir() . "/migrations/" . $fileName);
-            $migrationFileAssoc = json_decode($migrationFileContent,true);
-            if(!empty(trim($migrationFileAssoc['query']))){
-                if(!is_null($version)){
-                    $recordVersion = Version::stringToVersion($migrationFileAssoc['version']);
-                    $versionComparison = Version::compareVersions($version, $recordVersion);
+            $migrationFileAssoc = Toml::parseFile($this->migrationStructure->getMigrationRootDir() . "/migrations/" . $fileName);
+            if(!empty(trim($migrationFileAssoc['migration_details']['query']))){
+                try {
+                    $this->databaseAdapter->executeQuery($migrationFileAssoc['migration_details']['query']);
+                    echo $fileName . " Sucessfully migrated \n";
+                } catch (Exception $ex) {
+                    throw new Exception($fileName . " migration failed. Error: " . $ex->getMessage());
                 }
-                if(is_null($version) || ($versionComparison == 0 || $versionComparison == 1)){
-                    try {
-                        $this->databaseAdapter->executeQuery($migrationFileAssoc['query']);
-                        echo $fileName . " Sucessfully migrated \n";
-                    } catch (Exception $ex) {
-                        throw new Exception($fileName . " migration failed. Error: " . $ex->getMessage());
-                    }
-                    $completedMigrationsFileAssoc['completed'][] = $fileName;
-                }
+                $completedMigrationsFileAssoc['completed'][] = $fileName;
             }
         }
     }
@@ -128,26 +113,30 @@ class RecordMigrator{
      * Creates a single migration-record
      *
      * @param string $migrationName
-     * @param int $version
      * @return void
      */
-    public function createRecord($migrationName, $version = null){
+    public function createRecord($migrationName){
         if(file_exists($this->migrationStructure->getMigrationRootDir() . "/migrations") && !is_null($this->config)){
-            if(is_null($version)) $version = $this->latestMigrationVersion;
             $migrationTimeStamp = time();
             $uniqueId = UUID::v4();
-            $migrationFileName = $migrationTimeStamp . "_" . $migrationName . ".json";
+            $migrationFileName = $migrationTimeStamp . "_" . $migrationName . ".toml";
             $migrationFile = fopen($this->migrationStructure->getMigrationRootDir() . "/migrations/" . $migrationFileName, "w");
-            $migrationFileAssoc = ['uniqueId' => $uniqueId, 'version' => $version->getFormattedVersionString(), 'createdAt' => $migrationTimeStamp, 'migrationName' => $migrationName ,'query' => ""];
-            fwrite($migrationFile, json_encode($migrationFileAssoc, JSON_PRETTY_PRINT));
+
+            /**
+             * TODO: To be frank, this is kind of a mess. A cleaner solution would be to use the TOML-builder,
+             * but it lacked support for escaping double-quotes needed for creating multi-line string values
+             */
+            $migrationFileContent = '[migration_details]' . "\n" . 'unique_id = "' . 
+                                    $uniqueId . '" #Unique UUID' . "\n" . 'created_at = "' .
+                                    $migrationTimeStamp . '" #Unix timestamp of file-creation' .
+                                    "\n" . 'migration_name = "' .
+                                    $migrationName . '" #Name of migration' . "\n" . 
+                                     'query = """ """' . '#Paste valid query between the multi-line marks';
+            fwrite($migrationFile, $migrationFileContent);
         }
         else{
             throw new Exception('Migration structure not properly set. Have you ran "Sooth init" ?');
         }
-    }
-
-    private function getLatestVersionFromFiles(){
-
     }
 
     /**
