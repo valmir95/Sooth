@@ -22,8 +22,6 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
  */
-use Yosymfony\Toml\Toml;
-use Yosymfony\Toml\TomlBuilder;
 require __DIR__ . "/../vendor/autoload.php";
 require __DIR__ . "/../src/Util/UUID.php";
 require __DIR__ . "/../src/Config/Config.php";
