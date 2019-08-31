@@ -14,5 +14,8 @@
             "role": "Developer"
         }
     ],
-    "bin": ["bin/sooth"]
+    "bin": ["bin/sooth"],
+    "require": {
+        "yosymfony/toml": "^1.0"
+    }
 }
