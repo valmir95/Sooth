@@ -1,6 +1,5 @@
 <?php
 /**
- * Phinx
  *
  * (The MIT license)
  * Copyright (c) 2015 Rob Morgan
