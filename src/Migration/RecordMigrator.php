@@ -132,6 +132,7 @@ class RecordMigrator{
                                     $migrationName . '" #Name of migration' . "\n" . 
                                      'query = """ """' . ' #Paste valid query between the multi-line marks';
             fwrite($migrationFile, $migrationFileContent);
+            echo $migrationFileName . " successfully created!";
         }
         else{
             throw new Exception('Migration structure not properly set. Have you ran "Sooth init" ?');
